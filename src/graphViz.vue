@@ -51,7 +51,7 @@
 
 
   export default {
-    props: ['hypothesisId', 'nodes', 'highlightedNodeId', 'savedDiagram', 'width', 'height', 'textNodes', 'clickedGraphViz'],
+    props: ['hypothesisId', 'nodes', 'highlightedNodeId', 'savedDiagram', 'width', 'height', 'textNodes', 'clickedGraphViz', 'imgDropGraph'],
     name: 'graph-viz',
     components: { nodeList, toolBar },
     data() {
@@ -122,6 +122,14 @@
       });
     },
     watch: {
+      imgDropGraph(current, old) { // this appears to do nothing
+        if (current.dropped && current.dropped !== old.dropped) {
+          this.rootObservable.next({
+            type: ADDNODE,
+            newNode: { text: '<img src="' + current.src + '"><br>New'},
+          });
+        }
+      },
       width(current, old) { // this appears to do nothing
         if (current !== old) {
           this.graph.canvasOptions.setWidth(current);
