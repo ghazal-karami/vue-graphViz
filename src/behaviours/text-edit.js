@@ -120,12 +120,12 @@ export default ($action, startCallback, endCallback) => {
         .finally(() => {
           // textElem.innerText = textElem.innerText.trim().replace(/\n/g, "<br>");
           // textElem.innerText = textElem.innerHTML;
-          if (!textElem.innerText || textElem.innerText === '' || textElem.innerText.length === 0 ||
-            textElem.innerText[0] === '' || textElem.innerText === oldText) {
-            textElem.innerText = oldText;
+          if (!textElem.innerHTML || textElem.innerHTML === '' || textElem.innerHTML.length === 0 ||
+            textElem.innerHTML[0] === '' || textElem.innerHTML === oldText) {
+            textElem.innerHTML = oldText;
             fullRestart();
           } else {
-            save && save(textElem.innerText);
+            save && save(textElem.innerHTML);
           }
           endCallback && endCallback();
         });

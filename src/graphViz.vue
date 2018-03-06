@@ -51,7 +51,7 @@
 
 
   export default {
-    props: ['hypothesisId', 'nodes', 'highlightedNodeId', 'savedDiagram', 'width', 'height', 'textNodes', 'clickedGraphViz'],
+    props: ['hypothesisId', 'nodes', 'highlightedNodeId', 'savedDiagram', 'width', 'height', 'textNodes', 'imgDropGraph'],
     name: 'graph-viz',
     components: { nodeList, toolBar },
     data() {
@@ -122,6 +122,29 @@
       });
     },
     watch: {
+      imgDropGraph(current, old) { // this appears to do nothing
+        function imageToBase64(img) {
+          var canvas, ctx, dataURL, base64;
+          canvas = document.createElement("canvas");
+          ctx = canvas.getContext("2d");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          dataURL = canvas.toDataURL("image/png");
+          base64 = dataURL.replace(/^data:image\/png;base64,/, "");
+          return base64;
+        }
+        let img = document.getElementsByClassName(current.imgClass)[0]
+        let base64 = imageToBase64(img)
+        var parts = img.getAttribute('src').split('/');
+        var id = parts[parts.length - 1];
+        if (current.dropped && current.dropped !== old.dropped) {
+          this.rootObservable.next({
+            type: ADDNODE,
+            newNode: {text: '<img id="' + id +'" height="38" src="data:image/png;base64,' + base64 +  '"/><br/>New'},
+          });
+        }
+      },
       width(current, old) { // this appears to do nothing
         if (current !== old) {
           this.graph.canvasOptions.setWidth(current);
