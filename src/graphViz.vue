@@ -124,8 +124,9 @@
     watch: {
       imgDropGraph(current, old) { // this appears to do nothing
         function imageToBase64(img) {
-          var canvas, ctx, dataURL, base64;
-          canvas = document.createElement("canvas");
+          if (!img) return
+          var canvas, ctx, dataURL, base64
+          canvas = document.createElement("canvas")
           ctx = canvas.getContext("2d");
           canvas.width = img.width;
           canvas.height = img.height;
@@ -134,7 +135,7 @@
           base64 = dataURL.replace(/^data:image\/png;base64,/, "");
           return base64;
         }
-        let img = document.getElementsByClassName(current.imgClass)[0]
+        let img = document.querySelector('[src = "' + current.imgSrc + '"]')
         let base64 = imageToBase64(img)
         var parts = img.getAttribute('src').split('/');
         var id = parts[parts.length - 1];
