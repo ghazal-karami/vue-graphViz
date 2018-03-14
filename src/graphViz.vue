@@ -133,6 +133,8 @@
     },
     watch: {
       imgDropGraph(current, old) { // this appears to do nothing
+        let me = this
+
         function imageToBase64(img) {
           if (!img) return
           var canvas, ctx, dataURL, base64
@@ -145,15 +147,37 @@
           base64 = dataURL.replace(/^data:image\/png;base64,/, "");
           return base64;
         }
+
         let img = document.querySelector('[src = "' + current.imgSrc + '"]')
         let base64 = imageToBase64(img)
         var parts = img.getAttribute('src').split('/');
         var id = parts[parts.length - 1];
         if (current.dropped && current.dropped !== old.dropped) {
-          this.rootObservable.next({
-            type: ADDNODE,
-            newNode: {text: '<img id="' + id +'" height="38" src="data:image/png;base64,' + base64 +  '"/><br/>New'},
-          });
+          if (!current.existingNode) {
+            this.rootObservable.next({
+              type: ADDNODE,
+              newNode: {text: '<img id="' + id + '" height="38" src="data:image/png;base64,' + base64 + '"/><br/>New'},
+            })
+          } else {
+            let node = null
+            const indexOfNode = me.textNodes.map(v => v.id).indexOf(current.existingNode.id)
+
+            if (indexOfNode === -1) {
+              return
+            }
+
+            node = this.toNode(this.textNodes[indexOfNode]);
+            if (node.text.includes('<img')) {
+              node.text = node.text.replace(/<img[^>]*>/g, "")
+              node.text = node.text.replace(/<br\/>/g, "")
+            }
+            this.rootObservable.next({
+              type: NODEEDIT,
+              prop: TEXT,
+              value: '<img id="' + id + '" height="38" src="data:image/png;base64,' + base64 + '"/><br/>' + node.text,
+              id: current.existingNode.id,
+            });
+          }
         }
       },
       width(current, old) { // this appears to do nothing
