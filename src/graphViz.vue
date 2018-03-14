@@ -156,6 +156,7 @@
           return base64;
         }
         let img = document.querySelector('[src = "' + current.imgSrc + '"]')
+        if (!img) return
         let base64 = imageToBase64(img)
         var parts = img.getAttribute('src').split('/');
         var id = parts[parts.length - 1];
@@ -163,7 +164,7 @@
           if (!current.existingNode) {
             this.rootObservable.next({
               type: ADDNODE,
-              newNode: {text: '<img style="max-width:64px; max-height:64px; width:auto; height:auto;" id="' + id + '" src="data:image/png;base64,' + base64 + '"/><br>New'},
+              newNode: {text: '<img style="max-width:80px; max-height:80px; width:auto; height:auto;" id="' + id + '" src="data:image/png;base64,' + base64 + '"/><br>New'},
             })
           } else {
             let node = null
@@ -179,7 +180,7 @@
             this.rootObservable.next({
               type: NODEEDIT,
               prop: TEXT,
-              value: '<img id="' + id + '" src="data:image/png;base64,' + base64 + '"/><br>' + node.text,
+              value: '<img style="max-width:80px; max-height:80px; width:auto; height:auto;" id="' + id + '" src="data:image/png;base64,' + base64 + '"/><br>' + node.text,
               id: current.existingNode.id,
             });
           }
