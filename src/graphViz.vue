@@ -71,7 +71,17 @@
     mounted() {
       this.actions(this.rootObservable);
       this.graphClicked = true;
-      document.addEventListener('paste', this.onPaste);
+
+      const $paste = Rx.Observable.fromEvent(document, 'paste')
+        .filter(() => this.clickedGraphViz)
+        .filter(() => !this.ifColorPickerOpen)
+        .filter(() => this.mouseState === POINTER)
+        .subscribe((e) => {
+          this.rootObservable.next({
+            type: ADDNODE,
+            newNode: { text: e.clipboardData.getData('text/plain') },
+          });
+        });
 
       const ctrlDown = Rx.Observable.fromEvent(document, 'keydown')
         .filter(e => e.ctrlKey);
@@ -511,15 +521,6 @@
           );
       },
 
-      onPaste(e) {
-        if (this.clickedGraphViz && !this.ifColorPickerOpen) {
-          this.rootObservable.next({
-            type: ADDNODE,
-            newNode: { text: e.clipboardData.getData('text/plain') },
-          });
-        }
-      },
-
       deleteRadial() {
         $('.menu-color').remove();
         $('.menu-shape').remove();
@@ -728,7 +729,7 @@
               edge: edge,
               restart: this.graph.restart.layout,
               textElem: elem.node().querySelector('text'),
-              clickElem: elem,
+              clickedElem: elem,
               save: (newText) => {
                 this.rootObservable.next({
                   type: EDGEEDIT,
@@ -751,7 +752,7 @@
               clickedNode: node,
               restart: this.graph.restart.layout,
               textElem: elem.node().parentNode.querySelector('text'),
-              clickElem: elem,
+              clickedElem: elem,
               save: (newText) => {
                 this.rootObservable.next({
                   type: NODEEDIT,
@@ -772,6 +773,14 @@
           this.canKeyboardUndo = true;
           this.mouseState = POINTER;
         });
+
+        // set clickedgraphviz to true first time user clicks
+        const svgElem = this.graph.getSVGElement().node();
+        Rx.Observable.fromEvent(svgElem, 'click')
+          .take(1)
+          .subscribe(() => {
+            this.clickedGraphViz = true;
+          });
 
         // TODO find permanent solution to nodes created wrong size upon loading
         setTimeout(this.graph.restart.layout, 50);
@@ -944,6 +953,15 @@
 </script>
 
 <style>
+  .medium-editor-element {
+    min-height: inherit;
+  }
+
+  text p {
+    display: inherit;
+    -webkit-margin-after: 0;
+    -webkit-margin-before: 0;
+  }
 
   tooltip {
     /*position: absolute;*/
@@ -1052,7 +1070,7 @@
     padding-left: 1px;
   }
 
-  svg text.allowSelection::selection {
+  svg text.allowSelection::selection, svg text.allowSelection *::selection, svg text.allowSelection p::selection {
     background-color: highlight;
     color: highlighttext;
   }
